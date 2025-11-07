@@ -17,3 +17,16 @@ app.listen(PORT, () => {
 app.get('/', (req,res) => {
     res.send("Welcome to the webapp backend")
 })
+
+//Middleware Router(s)
+const movieRouter = require('./routers/movieRouter.js')
+app.use('/api/movies', movieRouter)
+
+
+//Middleware Endopoint Not Found Error
+const notFound = require('./middlewares/notFound.js')
+app.use(notFound)
+
+//Middleware Server Error
+const serverError = require('./middlewares/serverError.js')
+app.use(serverError);
