@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const { connection, query } = require('./database/configuration.js')
 
 const app = express()
@@ -17,6 +18,9 @@ app.listen(PORT, () => {
 app.get('/', (req,res) => {
     res.send("Welcome to the webapp backend")
 })
+
+//Middleware for CORS
+app.use(cors({ origin: 'http://localhost:5173'}));
 
 //Middleware Router(s)
 const movieRouter = require('./routers/movieRouter.js')
