@@ -32,15 +32,15 @@ function show(req, res) {
 
         if (result.length === 0) {
             return res.status(404).json({ message: 'Movie not found' });
-          }
+        }
 
 
         const reviews_sql = 'SELECT * FROM reviews WHERE movie_id = ?'
         connection.query(reviews_sql, [id], (rev_err, rev_res) => {
             if (rev_err) return res.status(400).json({
                 success: false,
-                message: 'impossible to fetch reviews table',
-                err
+                message: 'impossible to fetch reviews table', 
+                err 
             }) 
 
             const thisMovie = {...result[0], reviews: rev_res} 
@@ -51,4 +51,37 @@ function show(req, res) {
 
 }
 
-module.exports = { index, show }
+function storeReview(req, res) {
+
+    const { name, text, vote } = req.body
+    const movie_id = req.params.id
+
+    //Error Handling
+    if (!name || !vote) return res.status(400).json({message: 'BAD REQUEST: field "name" or "vote" are empty'})
+    if (name.length <= 2 || parseInt(vote) === 0) return res.status(400).json({
+        message: 'name must be longer than three characters and vote greater than zero'})
+    
+    //Query
+    const sql = 'INSERT INTO reviews (movie_id, name, text, vote) VALUES (?, ?, ?, ?)'   
+    connection.query(sql, [movie_id, name, text, vote], (err, result) => {
+        if (err) return res.status(400).json({
+            success: false,
+            message: 'impossible to add review to', 
+            err 
+        })
+        res.status(201).json({
+            success: true,
+            message: 'Review added successfully',
+            id: result.insertId
+        })
+    }) 
+
+
+    
+
+}
+
+module.exports = { 
+    index,
+    show, 
+    storeReview }
