@@ -2,7 +2,7 @@ const { connection } = require("../database/configuration")
 
 function index(req, res) {
     const sql = `SELECT  movies.*, AVG(reviews.vote) AS 'avg_rating' FROM movies
-                JOIN reviews ON movies.id = reviews.movie_id
+                LEFT JOIN reviews ON movies.id = reviews.movie_id
                 GROUP BY reviews.movie_id`
     connection.query(sql, (err, result) => {
         if (err) return res.status(400).json({
@@ -19,7 +19,7 @@ function show(req, res) {
     const { id } = req.params
     
     const sql = `SELECT  movies.*, AVG(reviews.vote) AS 'avg_rating' FROM movies
-                JOIN reviews ON movies.id = reviews.movie_id
+                LEFT JOIN reviews ON movies.id = reviews.movie_id
                 WHERE movies.id = ?
                 GROUP BY reviews.movie_id`
 
