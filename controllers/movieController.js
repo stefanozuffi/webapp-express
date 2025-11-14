@@ -52,12 +52,31 @@ function show(req, res) {
 
 }
 
-function store(req,res) {
-    console.log(req)
-    const { title, director, genre, release_year, abstract } = req.body
-    // const image = `${server_url}:${process.env.port}/uploads/` + req.file.filename
+function store(req, res) {
+    console.log('req.file:', req.file);
+    console.log('req.body:', req.body);
 
-    console.log(title, director, release_year)
+    const { title, director, genre, release_year, abstract } = req.body;
+    const image = 'http://localhost:3000/uploads/' + req.file.filename; 
+
+
+    const sql = 'INSERT INTO movies (title, director, genre, release_year, abstract, image) VALUES (?, ?, ?, ?, ?, ?)';
+    
+    connection.query(sql, [title, director, genre, release_year, abstract, image], (err, result) => {
+        if (err) {
+            return res.status(400).json({
+                success: false,
+                message: 'Error inserting movie',
+                err
+            });
+        }
+        
+        res.status(201).json({
+            success: true,
+            message: 'Movie created successfully',
+            id: result.insertId
+        });
+    });
 }
 
 function storeReview(req, res) {
