@@ -1,4 +1,5 @@
 const { connection } = require("../database/configuration")
+const server_url = 'http://localhost:'
 
 function index(req, res) {
     const sql = `SELECT  movies.*, AVG(reviews.vote) AS 'avg_rating' FROM movies
@@ -51,6 +52,14 @@ function show(req, res) {
 
 }
 
+function store(req,res) {
+    console.log(req)
+    const { title, director, genre, release_year, abstract } = req.body
+    // const image = `${server_url}:${process.env.port}/uploads/` + req.file.filename
+
+    console.log(title, director, release_year)
+}
+
 function storeReview(req, res) {
 
     const { name, text, vote } = req.body
@@ -84,4 +93,5 @@ function storeReview(req, res) {
 module.exports = { 
     index,
     show, 
+    store,
     storeReview }
