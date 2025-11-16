@@ -11,7 +11,7 @@ function index(req, res) {
             message: 'impossible to fetch table',
             err
         })
-        res.status(200).json(result)
+        res.status(201).json(result)
     })
 }
 
@@ -20,7 +20,7 @@ function show(req, res) {
     const { id } = req.params
     
     const sql = `SELECT  movies.*, AVG(reviews.vote) AS 'avg_rating' FROM movies
-                JOIN reviews ON movies.id = reviews.movie_id
+                LEFT JOIN reviews ON movies.id = reviews.movie_id
                 WHERE movies.id = ?
                 GROUP BY movies.id`
 
@@ -45,7 +45,7 @@ function show(req, res) {
             }) 
 
             const thisMovie = {...result[0], reviews: rev_res} 
-            res.status(200).json(thisMovie) 
+            res.status(201).json(thisMovie) 
         }) 
         
     })
