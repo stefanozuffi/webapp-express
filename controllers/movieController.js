@@ -1,6 +1,7 @@
 const { connection, query } = require("../database/configuration")
 const server_url = 'http://localhost:'
 
+
 function index(req, res) {
     const sql = `SELECT  movies.*, AVG(reviews.vote) AS 'avg_rating' FROM movies
                 LEFT JOIN reviews ON movies.id = reviews.movie_id
@@ -52,6 +53,23 @@ function show(req, res) {
 
 }
 
+
+function showReviews(req,res) {
+    const {id} = req.params
+
+    const reviews_sql = 'SELECT * FROM reviews WHERE movie_id = ?'
+    connection.query(reviews_sql, [id], (rev_err, rev_res) => {
+        if (rev_err) return res.status(400).json({
+            success: false,
+            message: 'impossible to fetch reviews table', 
+            err 
+        }) 
+
+        res.status(201).json(rev_res) 
+    }) 
+
+}
+
 function store(req, res) {
 
     const { title, director, genre, release_year, abstract } = req.body;
@@ -83,6 +101,7 @@ function store(req, res) {
     });
 }
 
+
 function storeReview(req, res) {
 
     const { name, text, vote } = req.body
@@ -108,6 +127,7 @@ function storeReview(req, res) {
         })
     }) 
 }
+
 
 async function destroy(req, res) {
 
@@ -141,29 +161,27 @@ async function destroy(req, res) {
         res.status(500).json({ message: 'Server Error', error: error.message });
     }
 }
-    
- 
-
 
 function destroyReview(req, res) { 
     const movie_id = req.params.id 
     const id = req.params.rev_id 
 
-    const sql = 'DELETE * FROM reviews WHERE movie_id = ? AND id = ?'
-    connection.query(sql, [movie_id, id], (err, result) => {
+    const sql = 'DELETE FROM reviews WHERE movie_id = ? AND id = ?' 
+    connection.query(sql, [movie_id, id], (err, result) => { 
         if (err) return res.status(500).json({message: 'server error: element was not destroyed', err})
-        res.status(204).json({
-            success: true,
-            message: 'element was eliminated successfully',
+        res.status(201).json({ 
+            success: true, 
+            message: 'review was eliminated successfully', 
             review_id: id 
         }) 
     }) 
 
-}
+} 
 
 module.exports = { 
     index,
     show, 
+    showReviews,
     store, 
     storeReview, 
     destroy, 

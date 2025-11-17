@@ -4,6 +4,7 @@ const movieController = require('../controllers/movieController.js')
 
 movieRouter.get('/', movieController.index)
 movieRouter.get('/:id', movieController.show)
+movieRouter.get('/:id/reviews', movieController.showReviews)
 movieRouter.post('/', upload.single('image'), movieController.store)
 movieRouter.post('/:id/reviews', movieController.storeReview)
 movieRouter.delete('/:id', movieController.destroy)
