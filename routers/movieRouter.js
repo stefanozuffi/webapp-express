@@ -6,5 +6,7 @@ movieRouter.get('/', movieController.index)
 movieRouter.get('/:id', movieController.show)
 movieRouter.post('/', upload.single('image'), movieController.store)
 movieRouter.post('/:id/reviews', movieController.storeReview)
+movieRouter.delete('/:id', movieController.destroy)
+movieRouter.delete('/:id/reviews/:rev_id', movieController.destroyReview)
 
 module.exports = movieRouter;

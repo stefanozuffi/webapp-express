@@ -1,4 +1,4 @@
-const { connection } = require("../database/configuration")
+const { connection, query } = require("../database/configuration")
 const server_url = 'http://localhost:'
 
 function index(req, res) {
@@ -19,9 +19,9 @@ function index(req, res) {
 function show(req, res) {
     const { id } = req.params
     
-    const sql = `SELECT  movies.*, AVG(reviews.vote) AS 'avg_rating' FROM movies
-                LEFT JOIN reviews ON movies.id = reviews.movie_id
-                WHERE movies.id = ?
+    const sql = `SELECT  movies.*, AVG(reviews.vote) AS 'avg_rating' FROM movies 
+                LEFT JOIN reviews ON movies.id = reviews.movie_id 
+                WHERE movies.id = ? 
                 GROUP BY movies.id`
 
     connection.query(sql, [id], (err, result) => {
@@ -53,12 +53,16 @@ function show(req, res) {
 }
 
 function store(req, res) {
-    console.log('req.file:', req.file);
-    console.log('req.body:', req.body);
 
     const { title, director, genre, release_year, abstract } = req.body;
     const image = 'http://localhost:3000/uploads/' + req.file.filename; 
 
+    if (!title || !director || !genre || !release_year || !abstract || !image) {
+        res.status(400).json({
+            success: false,
+            message: 'Bad Request: all fields must be not null!'
+        })
+    }
 
     const sql = 'INSERT INTO movies (title, director, genre, release_year, abstract, image) VALUES (?, ?, ?, ?, ?, ?)';
     
@@ -103,14 +107,65 @@ function storeReview(req, res) {
             id: result.insertId
         })
     }) 
+}
 
+async function destroy(req, res) {
 
+    const { id } = req.params
     
+    try {
+        // Delete dependecies (reviews)
+        const sql_revs = 'DELETE FROM reviews WHERE movie_id = ?'
+        const rev_res = await query(sql_revs, [id])
+
+        // Delete the movie
+        const sql_movie = 'DELETE FROM movies WHERE id = ?' 
+        const movie_res = await query(sql_movie, [id]) 
+
+        // Did the movie exist? 
+        if (movie_res.affectedRows === 0) { 
+            return res.status(404).json({ 
+                message: 'Movie not found' 
+            })
+        }
+
+        res.status(200).json({ 
+            message: 'Movie and related reviews deleted successfully', 
+            deletedReviews: rev_res.affectedRows, 
+            deletedMovie: movie_res.affectedRows 
+        })
+        
+    }
+   
+    catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+}
+    
+ 
+
+
+function destroyReview(req, res) { 
+    const movie_id = req.params.id 
+    const id = req.params.rev_id 
+
+    const sql = 'DELETE * FROM reviews WHERE movie_id = ? AND id = ?'
+    connection.query(sql, [movie_id, id], (err, result) => {
+        if (err) return res.status(500).json({message: 'server error: element was not destroyed', err})
+        res.status(204).json({
+            success: true,
+            message: 'element was eliminated successfully',
+            review_id: id 
+        }) 
+    }) 
 
 }
 
 module.exports = { 
     index,
     show, 
-    store,
-    storeReview }
+    store, 
+    storeReview, 
+    destroy, 
+    destroyReview 
+}
