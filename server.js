@@ -20,6 +20,9 @@ app.get('/', (req,res) => {
 const movieRouter = require('./routers/movieRouter.js')
 app.use('/api/movies', movieRouter)
 
+const chatRouter = require('./routers/chatRouter.js')
+app.use('/api', chatRouter)
+
 //Middleware Server Error (gestisce errori)
 const serverError = require('./middlewares/serverError.js')
 app.use(serverError);
